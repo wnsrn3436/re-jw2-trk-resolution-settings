@@ -1,0 +1,47 @@
+# Windows
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+._*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.ncb
+*.sdf
+*.opensdf
+*.ipch
+*.pdb
+*.cache
+
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+publish/
+게시/
+
+# GameMaker
+*.gb[0-9]
+*.gm8[0-9]
+*_orig.exe
+*.tmp
+*.bak
+
+# GitHub Releases 에만 올리는 배포 파일
+/release/

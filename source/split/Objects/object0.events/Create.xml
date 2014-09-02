@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<event category="CREATE" id="0">
+  <actions>
+    <action id="603" library="1">
+      <!--action name: Code-->
+      <kind>CODE</kind>
+      <allowRelative>false</allowRelative>
+      <question>false</question>
+      <canApplyTo>true</canApplyTo>
+      <actionType>CODE</actionType>
+      <functionName/>
+      <relative>false</relative>
+      <not>false</not>
+      <appliesTo>.self</appliesTo>
+      <arguments>
+        <argument kind="STRING">if(parameter_string(1)=="")
+{
+    game_end()
+    exit
+}
+
+set_width = real(scr_string_strip_at(parameter_string(1), " x ", 0))
+set_height = real(scr_string_strip_at(parameter_string(1), " x ", 1))
+
+db = ds_list_create()
+
+xpos = set_width-800
+ypos = set_height-600
+//
+
+file = file_text_open_read("DB.dat")
+str = file_text_read_string(file)
+while(str!="")
+{
+    ds_list_add(db, hex_to_dec(str))
+    file_text_readln(file)
+    str = file_text_read_string(file)
+}
+file_text_close(file)
+//
+
+fname = get_save_filename("TheRanker File|*.exe", "TheRanker "+parameter_string(1)+".exe")
+file_copy("trk.ex_", fname)
+//
+
+file = file_bin_open(fname, 2)
+
+int = -4194304
+file_bin_seek(file, ds_list_find_value(db, 0)+int)
+file_bin_write_int(file, set_width)
+file_bin_seek(file, ds_list_find_value(db, 1)+int)
+file_bin_write_int(file, set_height)
+//
+
+file_bin_seek(file, hex_to_dec("8640A8")-4194304)
+file_bin_write_int(file, 19+round(xpos/2))
+file_bin_seek(file, hex_to_dec("8640AC")-4194304)
+file_bin_write_int(file, 518+ypos)
+//
+
+for(i=0; i!=4; i+=1)
+{
+    int = (4*i)-4194304
+    file_bin_seek(file, hex_to_dec("8635A0")+int)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("8635A0")+int)
+    file_bin_write_int(file, int2+ypos)
+}
+//
+
+for(i=0; i!=4; i+=1)
+{
+    int = (24*i)+96-4194304
+    for(j=0; j!=ds_list_size(db); j+=1)
+    {
+        file_bin_seek(file, ds_list_find_value(db, j)+int)
+        int2 = file_bin_read_int(file)
+        file_bin_seek(file, ds_list_find_value(db, j)+int)
+        if(j mod 2){
+            file_bin_write_int(file, int2+round(xpos/2))
+        }
+        else{
+            file_bin_write_int(file, int2+ypos)
+        }
+    }
+}
+//
+
+file_bin_seek(file, hex_to_dec("8642E0")+16-4194304)
+int2 = file_bin_read_int(file)
+file_bin_seek(file, hex_to_dec("8642E0")+16-4194304)
+file_bin_write_int(file, int2+ypos)
+
+file_bin_seek(file, hex_to_dec("8642DC")+16-4194304)
+int2 = file_bin_read_int(file)
+file_bin_seek(file, hex_to_dec("8642DC")+16-4194304)
+file_bin_write_int(file, int2+round(xpos/2))
+//
+
+file_bin_seek(file, hex_to_dec("8642E8")+16-4194304)
+int2 = file_bin_read_int(file)
+file_bin_seek(file, hex_to_dec("8642E8")+16-4194304)
+file_bin_write_int(file, int2+ypos)
+
+file_bin_seek(file, hex_to_dec("8642E4")+16-4194304)
+int2 = file_bin_read_int(file)
+file_bin_seek(file, hex_to_dec("8642E4")+16-4194304)
+file_bin_write_int(file, int2+round(xpos/2))
+//
+
+file_bin_seek(file, hex_to_dec("864318")+8-4194304)
+int2 = file_bin_read_int(file)
+file_bin_seek(file, hex_to_dec("864318")+8-4194304)
+file_bin_write_int(file, int2+ypos)
+
+file_bin_seek(file, hex_to_dec("864314")+8-4194304)
+int2 = file_bin_read_int(file)
+file_bin_seek(file, hex_to_dec("864314")+8-4194304)
+file_bin_write_int(file, int2+round(xpos/2))
+//
+
+v4 = 16
+v6 = 16
+do
+{
+    file_bin_seek(file, hex_to_dec("864450")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("864450")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+ypos)
+    
+    file_bin_seek(file, hex_to_dec("86444C")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("86444C")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+round(xpos/2))
+    
+    v6+=1
+    v4-=1
+}
+until(!v4);
+//
+
+v4 = 14
+v6 = 14
+do
+{
+    file_bin_seek(file, hex_to_dec("864174")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("864174")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+ypos)
+    
+    file_bin_seek(file, hex_to_dec("864170")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("864170")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+round(xpos/2))
+    
+    v6+=1
+    v4-=1
+}
+until(!v4);
+//
+
+v4 = 5
+v6 = 5
+do
+{
+    file_bin_seek(file, hex_to_dec("864358")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("864358")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+ypos)
+    
+    file_bin_seek(file, hex_to_dec("864354")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("864354")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+round(xpos/2))
+    
+    v6+=1
+    v4-=1
+}
+until(!v4);
+//
+
+v4 = 6
+v6 = 6
+do
+{
+    file_bin_seek(file, hex_to_dec("864600")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("864600")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+ypos)
+    
+    file_bin_seek(file, hex_to_dec("8645FC")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("8645FC")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+round(xpos/2))
+    
+    v6+=1
+    v4-=1
+}
+until(!v4);
+//
+
+v4 = 7
+v6 = 7
+do
+{
+    file_bin_seek(file, hex_to_dec("8646C8")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("8646C8")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+ypos)
+    
+    file_bin_seek(file, hex_to_dec("8646C4")+(4*2*v6)-4194304)
+    int2 = file_bin_read_int(file)
+    file_bin_seek(file, hex_to_dec("8646C4")+(4*2*v6)-4194304)
+    file_bin_write_int(file, int2+round(xpos/2))
+    
+    v6+=1
+    v4-=1
+}
+until(!v4);
+//
+
+file_bin_close(file)
+
+ds_list_destroy(db)
+game_end()
+</argument>
+      </arguments>
+    </action>
+  </actions>
+</event>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+  <resource name="dec_to_hex" type="RESOURCE"/>
+  <resource name="hex_to_dec" type="RESOURCE"/>
+  <resource name="file_bin_write_int" type="RESOURCE"/>
+  <resource name="file_bin_read_int" type="RESOURCE"/>
+  <resource name="scr_string_strip_at" type="RESOURCE"/>
+</resources>
