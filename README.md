@@ -1,8 +1,10 @@
 # Jurassic Primitive War 2: The Ranker Resolution Settings
 
-A tool that runs Jurassic Primitive War 2: The Ranker at any resolution the monitor supports. Trk Resolution Settings, written in C#, shows the monitor's resolution list and hands the chosen one to Setting.exe, made with GameMaker 8. Setting.exe copies the bundled The Ranker executable `trk.ex_` into a new executable whose screen size and bottom interface coordinates are edited for that resolution. The analyzed addresses are in [docs/resolution-patch.md](docs/resolution-patch.md).
+[한국어](README.ko.md)
 
-It was distributed for Jurassic Primitive War 2: The Ranker v2003.12.29 or later.
+A tool that runs Jurassic Primitive War 2: The Ranker at any resolution the monitor supports. Trk Resolution Settings, written in C#, shows the monitor's resolution list and hands the chosen one to Setting.exe, made with GameMaker 8. Setting.exe copies `trk.ex_`, the bundled The Ranker executable, and builds a new executable from it with the screen size and the coordinates of the interface at the bottom of the screen changed to fit that resolution. The addresses from the analysis are in [docs/resolution-patch.md](docs/resolution-patch.md).
+
+When it was distributed, users were told to use it with Jurassic Primitive War 2: The Ranker v2003.12.29 or later.
 
 <p>
   <img src="docs/screenshots/screenshot-1.jpg" width="480" alt="The Ranker running at a wide resolution with the interface at the bottom center">
@@ -11,16 +13,16 @@ It was distributed for Jurassic Primitive War 2: The Ranker v2003.12.29 or later
 
 ## How to use
 
-The Releases download contains Trk Resolution Settings.exe, Setting.exe, DB.dat, and trk.ex_. Keep the four files in one folder and run Trk Resolution Settings.exe.
+The Releases download contains Trk Resolution Settings.exe, Setting.exe, DB.dat, and trk.ex_. Put the four files in one folder and run Trk Resolution Settings.exe.
 
-Picking a monitor in the upper list fills the lower list with the resolutions it supports. The Set button is enabled only when the primary monitor is picked. Picking a resolution and pressing Set closes the window and opens a save dialog. The default name carries the resolution, such as `TheRanker 1280 x 1024.exe`. Save it in the folder where The Ranker is installed and start the game with that executable. The original executable stays as it is.
+Pick a monitor in the upper list and the lower list shows the resolutions that monitor supports. The Set button works only when the primary monitor is selected. Choose a resolution and press Set: the window closes and a save dialog opens, with the resolution in the default file name, as in `TheRanker 1280 x 1024.exe`. Save it in the folder where The Ranker is installed and start the game with that executable. The original executable is left as it is.
 
-As the screen grows beyond 800x600, the interface moves horizontally to the center and vertically to the bottom.
+The interface moves by however much the screen has grown past 800x600, toward the center horizontally and downward vertically.
 
 
 ## How it works
 
-**The resolution list comes from the Win32 API.** `EnumDisplayDevices` reads the display devices one by one, and `EnumDisplaySettings` is called with the chosen device's name from mode number 0 until it fails, collecting `width x height` strings. Modes that differ only in refresh rate or color depth give the same string, so each is added once. Set is enabled only when the device's `StateFlags` has the primary device bit (4).
+**The resolution list comes from the Win32 API.** The tool reads the display devices one by one with `EnumDisplayDevices`, then calls `EnumDisplaySettings` with the chosen device's name for mode numbers from 0 until the call fails, collecting `width x height` strings. Modes that differ only in refresh rate or color depth produce the same string, so that string goes in only once. Set is enabled only when the device's `StateFlags` has the primary device bit (4).
 
 ```csharp
 do
@@ -48,9 +50,9 @@ System.Diagnostics.Process program =
     System.Diagnostics.Process.Start("Setting.exe", temps.ToString() + listSettings.SelectedItem + temps.ToString());
 ```
 
-**`trk.ex_` is an executable edited to read the resolution and interface coordinates from data.** The code at `0x4D6E97` that sets the screen width and height reads the values at `0x8635CC` and `0x8635C8`. The interface coordinate table is read from the slot `ecx * 0x60 + race * 0x18`, and the function that reads it sets `ecx` to 1 at its start. So only the slots for `ecx` 1 are used, and the first slot for `ecx` 0 (`0x8635C8`, `0x8635CC`) becomes the place to keep the resolution. Setting.exe treats the coordinates in the `ecx` 1 slots as 800x600-based values and moves them. The edited places remain as runs filled with `NOP`.
+**`trk.ex_` is The Ranker's executable with its code already edited to read the resolution and interface coordinates from data.** The code at `0x4D6E97` that sets the screen width and height reads the values at `0x8635CC` and `0x8635C8`. The interface coordinate table is read at `ecx * 0x60 + race * 0x18`, and the function that reads it sets `ecx` to 1 right at the start. As a result only the slots where `ecx` is 1 are used, and the first slot for `ecx` 0 (`0x8635C8`, `0x8635CC`) is where the resolution values go. Setting.exe takes the coordinates in the slots where `ecx` is 1 as values for 800x600 and moves them. The edited spots remain as sections filled with `NOP`.
 
-**Setting.exe edits only the data of the copy.** It splits the `width x height` argument into numbers, reads the hex addresses in `DB.dat`, and copies `trk.ex_` to the name chosen in the save dialog. It writes the width and height to the first two addresses and adds half of `xpos = width - 800` and `ypos = height - 600` to the other coordinates. The addresses are virtual addresses, so the file position is found by subtracting the image base `0x400000`. The coordinate table slots are each `DB.dat` address plus `0x60 + 0x18 * race`, which are the four race slots for `ecx` 1. The first line of a pair is y and the second x.
+**Setting.exe edits only the copy's data.** It splits the `width x height` argument into numbers, reads the hex addresses in `DB.dat`, and copies `trk.ex_` under the name chosen in the save dialog. It writes the width and height to the first two addresses and adds `ypos = height - 600` and half of `xpos = width - 800` to the other coordinates. The addresses are virtual, so subtracting the image base `0x400000` gives the file position. The coordinate table slots are at each `DB.dat` address plus `0x60 + 0x18 * race`, meaning the four race slots where `ecx` is 1. The first line of each pair is y and the second is x.
 
 ```gml
 for(i=0; i!=4; i+=1)
@@ -71,19 +73,19 @@ for(i=0; i!=4; i+=1)
 }
 ```
 
-Coordinate tables not listed in `DB.dat` have their addresses written directly in the code, and the x and y of their `ecx` 1 slots are moved the same way. The `file_bin_*` functions of GameMaker 8 work in bytes, so 4-byte integers are packed and unpacked in little endian by the `file_bin_read_int` and `file_bin_write_int` scripts.
+For coordinate tables not in `DB.dat`, the addresses are written directly in the code, and the x and y in their slots where `ecx` is 1 are moved the same way. GameMaker 8's `file_bin_*` functions work one byte at a time, so the `file_bin_read_int` and `file_bin_write_int` scripts pack and unpack 4-byte integers in little endian.
 
 
 ## Files
 
 | Path | Content |
 |---|---|
-| `source/Trk Resolution Settings/` | Visual Studio solution of Trk Resolution Settings (C#, .NET Framework 4.5) |
-| `source/Setting.gmk` | GameMaker 8 project file of Setting.exe |
-| `source/split/` | Text tree produced by GmkSplitter |
+| `source/Trk Resolution Settings/` | Visual Studio solution for Trk Resolution Settings (C#, .NET Framework 4.5) |
+| `source/Setting.gmk` | GameMaker 8 project file for Setting.exe |
+| `source/split/` | Text tree split out with GmkSplitter |
 | `docs/resolution-patch.md` | Resolution and interface coordinate addresses |
 | `docs/screenshots/` | Screenshots |
-| Releases | Trk Resolution Settings.exe, Setting.exe, DB.dat, trk.ex_, and a manual |
+| Releases | Trk Resolution Settings.exe, Setting.exe, DB.dat, trk.ex_, and usage instructions |
 
 
 ## Credits
